@@ -1,0 +1,56 @@
+#! /bin/sh
+
+prefix="/usr/local/iphone"
+version=""
+type="simulator"
+
+usage() {
+    echo "Usage: `basename $0` <version> [-d <dir>] [-t <target-type>] -- [configure-args ...]"
+    echo ''
+    echo '   `version` -- iPhone software version (3.1.2, 3.2, etc.)'
+    echo '   `dir` -- prefix for iphone software directory (default /usr/local/iphone)'
+    echo '   `host` -- target host, must be "simulator" or "os" (defaults to "simulator")'
+    exit 1;
+}
+
+simulator() {
+    [ ! "$type" == "os" ];
+}
+
+while getopts 'd:v:t:' o; do
+    case "$o" in
+        d) prefix="$OPTARG";;
+        v) version="$OPTARG";;
+        t) type="$OPTARG";;
+        ?) usage
+    esac
+done
+shift $(($OPTIND - 1))
+
+if [ -z "$version" ]; then
+    usage
+fi
+
+mkdir -p "$prefix"
+
+if simulator; then
+    prefix="$prefix/iPhoneSimulator$version"
+else
+    prefix="$prefix/iPhoneOS$version"
+fi
+
+if simulator; then
+    export CC="/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.0 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator$version.sdk"
+    export CXX="/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/g++-4.0 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator$version.sdk"
+    export CFLAGS="-fasm-blocks -Wno-trigraphs -Wreturn-type -Wunused-variable -I$prefix/include -L$prefix/lib"
+    export CXXFLAGS="$CFLAGS"
+    ./configure --prefix="$prefix" "$@"
+else
+    export CC="/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-gcc-4.0.1 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS$version.sdk"
+    export CXX="/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin9-g++-4.0.1 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS$version.sdk"
+    export CFLAGS="-arch armv6 -fasm-blocks -Wno-trigraphs -Wreturn-type -Wunused-variable -I$prefix/include -L$prefix/lib"
+    export CXXFLAGS="$CFLAGS"
+    export LDFLAGS="-arch armv6"
+    ##   possibly? -mthumb
+    ./configure --host=arm-apple-darwin --prefix="$prefix" "$@"
+fi

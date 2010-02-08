@@ -1,0 +1,35 @@
+`configure-iphone` is a utility shell script to help build libraries
+for iPhone devices.
+
+Description
+-----------
+
+Assuming the autoconf build system, it runs `configure` with default
+settings for building the library using a specific iPhone OS version's
+gcc and frameworks, cross-compiling to ARM if necessary.
+
+You must pass an iPhone OS version to use, such as "3.1.2" or "3.2".
+
+It only runs `configure`, not `make` or `make install`, which you must
+run yourself. If you use this script, `make install` will install the
+software under "/usr/local/iphone", unless overridden with the "-d"
+argument.
+
+The software will be installed in a subdirectory named
+"iPhone[type][version]", where "type" is either "Simulator" or "OS"
+and version is the OS version. This directory will reflect the
+standard layout, containing a "lib", "include", "bin", and other
+directories.
+
+When building your iPhone project, you should add the appropriate
+folder for header and lib paths, such as
+"/usr/local/iphone/iPhoneSimulator3.1.2/include" for headers.
+
+Usage
+-----
+
+Usage: configure-iphone <version> [-d <dir>] [-t <target-type>] -- [configure-args ...]
+
+   `version` -- iPhone software version (3.1.2, 3.2, etc.)
+   `dir` -- prefix for iphone software directory (default /usr/local/iphone)
+   `host` -- target host, must be "simulator" or "os" (defaults to "simulator")
