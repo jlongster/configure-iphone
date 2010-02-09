@@ -3,8 +3,9 @@
 ### Copyright (c) 2010 by James Long, All Rights Reserved.
 
 prefix="/usr/local/iphone"
-version=""
 type="simulator"
+version="$1"
+shift
 
 usage() {
     echo "Usage: `basename $0` <version> [-d <dir>] [-t <target-type>] -- [configure-args ...]"
@@ -16,7 +17,7 @@ usage() {
 }
 
 simulator() {
-    [ ! "$type" == "os" ];
+    [ ! "$type" == "OS" ];
 }
 
 while getopts 'd:v:t:' o; do
@@ -35,10 +36,21 @@ fi
 
 mkdir -p "$prefix"
 
+if [ "$type" == "simulator" ]; then
+    type="Simulator"
+else
+    type="OS"
+fi
+
 if simulator; then
     prefix="$prefix/iPhoneSimulator$version"
 else
     prefix="$prefix/iPhoneOS$version"
+fi
+
+if [ ! -d "/Developer/Platforms/iPhone$type.platform/Developer/SDKs/iPhone$type$version.sdk" ]; then
+    echo "Invalid iPhone OS version: $version"
+    exit
 fi
 
 if simulator; then
